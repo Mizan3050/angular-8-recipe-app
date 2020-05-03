@@ -672,6 +672,287 @@ and indicate the its resolver inside routing
 ```angular2
  {path: ':id', component: ServerComponent, resolve: {server: ServerResolverService}},
 ``` 
+
+# Handling Forms in Angular
+(TD) Template-Driven Forms vs Reactive Approach
+## (TD) Template-Driven Forms
+
+first of all, import `FormsModule` in appModule class.
+
+```html
+      <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+        <div id="user-data">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="form-control" ngModel name="username">
+          </div>
+          <button class="btn btn-default" type="button">Suggest an Username</button>
+          <div class="form-group">
+            <label for="email">Mail</label>
+            <input type="email" id="email" class="form-control" ngModel name="email">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+```
+and access the form element as below :
+```angular2
+  onSubmit(ngForm: NgForm) {
+    console.log(ngForm);
+  }
+```
+
+Completed Example :
+```angular2html
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form (ngSubmit)="onSubmit()" #f="ngForm">
+        <div id="user-data" ngModelGroup="userData" #userData="ngModelGroup">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="form-control" ngModel name="username" required>
+          </div>
+          <button class="btn btn-warning" type="button" (click)="suggestUserName()">Suggest an Username</button>
+          <div class="form-group">
+            <label for="email">Mail</label>
+            <input type="email" id="email" class="form-control"
+                   ngModel name="email" required email
+                   #email="ngModel">
+            <span *ngIf="email.invalid && email.touched" class="help-block">Please enter a valid value!</span>
+          </div>
+        </div>
+        <p *ngIf="userData.invalid && userData.touched">Please enter a valid user data!</p>
+        <div class="form-group">
+          <label for="secret">Secret Questions</label>
+          <select id="secret" class="form-control" [ngModel]="defaultQuestion" name="secret">
+            <option value="pet">Your first Pet?</option>
+            <option value="teacher">Your first teacher?</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea name="questionAnswer" rows="3" [(ngModel)]="questionAnswer"></textarea>
+        </div>
+        <p>Your reply : {{questionAnswer}}</p>
+
+        <div class="radio" *ngFor="let gender of genders">
+          <label>
+            <input type="radio" name="gender" [value]="gender" ngModel>
+            {{gender}}
+          </label>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="f.invalid">Submit</button>
+      </form>
+    </div>
+  </div>
+  <hr>
+  <div class="row" *ngIf="submitted">
+    <div class="col-xs-12">
+      <h3>Your Data</h3>
+      <p>Username: {{user.username}}</p>
+      <p>Mail: {{user.email}}</p>
+      <p>Secret Question: {{user.secretQuestion}}</p>
+      <p>Answer: {{user.answer}}</p>
+      <p>Gender: {{user.gender}}</p>
+    </div>
+  </div>
+</div>
+```
+
+```angular2
+export class OldComponent implements OnInit {
+
+  @ViewChild('f', {static: false}) signupForm: NgForm;
+
+  defaultQuestion = 'pet';
+  questionAnswer = '';
+  genders = ['male', 'female'];
+
+  user = {
+    username: '',
+    email: '',
+    secretQuestion: '',
+    answer: '',
+    gender: ''
+  };
+  submitted = false;
+
+  suggestUserName() {
+    const suggestedName = 'Superuser';
+    this.signupForm.form.patchValue({
+      userData: {
+        username: suggestedName
+      }
+    });
+  }
+
+  onSubmit() {
+    this.submitted = true;
+    this.user.username = this.signupForm.value.userData.username;
+    this.user.email = this.signupForm.value.userData.email;
+    this.user.secretQuestion = this.signupForm.value.secret;
+    this.user.answer = this.signupForm.value.questionAnswer;
+    this.user.gender = this.signupForm.value.gender;
+
+    this.signupForm.reset();
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+```
+
+## Reactive Forms
+
+1- Instead of `FormsModule`, `ReactiveFormsModule` should be imported now!
+2- Tell signupForm to your html form using `formGroup directive.
+```angular2html
+<form [formGroup]="signUpForm">
+````
+3- Synchronize signUpForm between Html and Typescript
+```angular2
+  signUpForm: FormGroup;
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup({
+      'username': new FormControl(null),
+      'email': new FormControl(null),
+      'gender': new FormControl('male')
+    });
+  }
+```
+4- Put formControlName directive to each input element inside html with corresponding form element name
+```angular2html
+<input
+            type="text"
+            id="username"
+            formControlName="username"
+            class="form-control">
+        </div>
+```
+ 
+### Adding Validators
+ ```angular2
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup({
+      'username': new FormControl(null, Validators.required),
+      'email': new FormControl(null, [Validators.required, Validators.email]),
+      'gender': new FormControl('male')
+    });
+  }
+``` 
+### Getting Access to Controls from HTML
+Use `'form-name'.get('input-control-name')
+```angular2html
+          <span class="help-block" *ngIf="signUpForm.get('email').invalid && signUpForm.get('email').touched"> Please provide a valid email!</span>
+```
+
+### Dynamically Add Form Controls to Form
+1- Add a `FormArray` to your `FormGroup` and push a new FormControl by using an EventHandler. 
+```angular2
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup({
+      'userData': new FormGroup({
+        'username': new FormControl(null, Validators.required),
+        'email': new FormControl(null, [Validators.required, Validators.email])
+      }),
+      'gender': new FormControl('male'),
+      'hobbies': new FormArray([])
+    })
+    ;
+  }
+
+  getControls() {
+    return (<FormArray>this.signUpForm.get('hobbies')).controls;
+  }
+
+  onAddHobby() {
+    const formControl = new FormControl(null, Validators.required);
+    (<FormArray>this.signUpForm.get('hobbies')).push(formControl);
+  }
+```
+
+2- HTML Side
+```angular2html
+        <div formArrayName="hobbies">
+          <h4>Your Hobbies</h4>
+          <button type="button" class="btn btn-primary" (click)="onAddHobby()">Add Hobby</button>
+          <div class="form-group"
+               *ngFor="let hobbyControl of getControls() let i=index">
+            <input type="text" class="form-control" [formControlName]="i">
+          </div>
+        </div>
+```
+
+
+### Creating Custom Validator
+Add `this.isForbiddenUserNames.bind(this)` to validators array. 
+```angular2
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup({
+      'userData': new FormGroup({
+        'username': new FormControl(null, [Validators.required, this.isForbiddenUserNames.bind(this)]),
+        'email': new FormControl(null, [Validators.required, Validators.email])
+      }),
+      'gender': new FormControl('male'),
+      'hobbies': new FormArray([])
+    })
+    ;
+  }
+
+  isForbiddenUserNames(control: FormControl): { [key: string]: boolean } {
+    if (this.forbiddenUserNames.indexOf(control.value) !== -1) {
+      return {'nameIsForbidden': true};
+    } else {
+      return null;
+    }
+  }
+```
+### Using Error Code
+```angular2html
+            <span class="help-block"
+                  *ngIf="signUpForm.get('userData.username').invalid && signUpForm.get('userData.username').touched">
+              <span *ngIf="signUpForm.get('userData.username').errors['nameIsForbidden']">
+                Please provide a valid username!
+              </span>
+              <span *ngIf="signUpForm.get('userData.username').errors['required']">
+                Username is required!
+              </span>
+            </span>
+```
+
+### Creating Custom Async Validator
+Pass new async validator as third argument!
+```angular2
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup({
+      'userData': new FormGroup({
+        'username': new FormControl(null, [Validators.required, this.isForbiddenUserNames.bind(this)]),
+        'email': new FormControl(null, [Validators.required, Validators.email], this.isForbiddenEmail)
+      }),
+      'gender': new FormControl('male'),
+      'hobbies': new FormArray([])
+    })
+    ;
+  }
+
+  isForbiddenEmail(control: FormControl): Promise<any> | Observable<any> {
+    const promise = new Promise(((resolve, reject) => {
+      setTimeout(() => {
+        if (control.value === 'test@test.com') {
+          resolve('emailIsForbidden:true');
+        } else {
+          resolve(null);
+        }
+      }, 1500);
+    }));
+    return promise;
+  }
+```
+
+
+
 # Component Lifecycle
 
  - ngOnChanges : executed multiple times, it's executed right at the start when a new component is created but thereafter, 
