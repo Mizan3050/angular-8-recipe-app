@@ -21,10 +21,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.shoppingListForm = new FormGroup({
-      name: new FormControl(null, Validators.required),
-      amount: new FormControl(null, [Validators.required, amountValidator])
-    });
+    this.initForm();
 
     this.subscription = this.shoppingListService.startedEditing.subscribe((index: number) => {
       this.editedIndex = index;
@@ -34,6 +31,13 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
         name: ingredient.name,
         amount: ingredient.amount
       });
+    });
+  }
+
+  private initForm() {
+    this.shoppingListForm = new FormGroup({
+      name: new FormControl(null, Validators.required),
+      amount: new FormControl(null, [Validators.required, amountValidator])
     });
   }
 

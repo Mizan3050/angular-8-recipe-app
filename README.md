@@ -703,7 +703,7 @@ and access the form element as below :
 ```
 
 Completed Example :
-```angular2html
+```html
 <div class="container">
   <div class="row">
     <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
@@ -807,7 +807,7 @@ export class OldComponent implements OnInit {
 
 1- Instead of `FormsModule`, `ReactiveFormsModule` should be imported now!
 2- Tell signupForm to your html form using `formGroup directive.
-```angular2html
+```html
 <form [formGroup]="signUpForm">
 ````
 3- Synchronize signUpForm between Html and Typescript
@@ -823,7 +823,7 @@ export class OldComponent implements OnInit {
   }
 ```
 4- Put formControlName directive to each input element inside html with corresponding form element name
-```angular2html
+```html
 <input
             type="text"
             id="username"
@@ -844,7 +844,7 @@ export class OldComponent implements OnInit {
 ``` 
 ### Getting Access to Controls from HTML
 Use `'form-name'.get('input-control-name')
-```angular2html
+```html
           <span class="help-block" *ngIf="signUpForm.get('email').invalid && signUpForm.get('email').touched"> Please provide a valid email!</span>
 ```
 
@@ -874,7 +874,7 @@ Use `'form-name'.get('input-control-name')
 ```
 
 2- HTML Side
-```angular2html
+```html
         <div formArrayName="hobbies">
           <h4>Your Hobbies</h4>
           <button type="button" class="btn btn-primary" (click)="onAddHobby()">Add Hobby</button>
@@ -910,7 +910,7 @@ Add `this.isForbiddenUserNames.bind(this)` to validators array.
   }
 ```
 ### Using Error Code
-```angular2html
+```html
             <span class="help-block"
                   *ngIf="signUpForm.get('userData.username').invalid && signUpForm.get('userData.username').touched">
               <span *ngIf="signUpForm.get('userData.username').errors['nameIsForbidden']">
@@ -950,8 +950,110 @@ Pass new async validator as third argument!
     return promise;
   }
 ```
+# Using Pipes to Transform Output Data in Template
+Use `|` sign and give your desired operation to transform your output data..
+By using `:`, you can provide parameters to pipes as below
 
+If you look at date part of the example, chaining is also possible to transform output using pipe.  
 
+```html
+{{ server.instanceType | uppercase }} | {{ server.started | date:'fullDate' | uppercase}}
+```
+## Creating a Custom Pipe
+
+Shortcut `ng g p <name>`
+
+1- Add this `Pipe` decorator
+2- Implement `PipeTransform` class and its method transform
+3- Add this new Shorten pipe to `app.module` as a new declaration  
+```angular2
+@Pipe({
+  name: 'shorten'
+})
+
+export class Shorten implements PipeTransform {
+  transform(value: any) {
+    if (value.length > 10) {
+      return value.substr(0, 10) + ' ...';
+    } else {
+      return value;
+    }
+  }
+
+}
+```
+
+## Parameterizing a Custom Pipe
+```angular2
+@Pipe({
+  name: 'shorten'
+})
+
+export class Shorten implements PipeTransform {
+  transform(value: any, limit:number) {
+    if (value.length > limit) {
+      return value.substr(0, 10) + ' ...';
+    } else {
+      return value;
+    }
+  }
+
+}
+```
+pass limit parameter as 15 as below :
+```html
+{{ server.name | shorten:15 }}
+```
+!! Angular pipe doesn't recalculate once data changed. It will only recalculate once you change pipe parameters....
+
+But you could force this by making parameter pure to false. Don't forget this can lead performance issue..
+```angular2
+@Pipe({
+  name: 'filter',
+  pure: false
+})
+```
+
+## Understanding the async Pipe
+
+async pipe recognizes that the output is a promise or observable and it subscribes automatically. 
+After fetching data, it will print the subscribed data.
+
+ 
+```html
+{{ serverStatus | async }}
+```
+
+# Making Http Requests
+
+## Interceptors
+
+Create an interceptor by implementing HttpInterceptor
+ 
+```angular2
+export class AuthInterceptorService implements HttpInterceptor {
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log('Request is on its way');
+    const modifiedRequest = req.clone({headers: req.headers.append('Auth', 'xyz')});
+    return next.handle(modifiedRequest);
+  }
+
+}
+
+```
+
+Add new interceptor as a provider with following parameters,
+```angular2
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, HttpClientModule],
+  providers: [{provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true}],
+  bootstrap: [AppComponent]
+})
+export class AppModule {
+}
+```
 
 # Component Lifecycle
 
@@ -964,10 +1066,7 @@ Pass new async validator as third argument!
  - ngAfterViewInit : Called after the component's view (and child views) has been initialized
  - ngAfterViewChecked : Called every time the view (and child views) have been checked
  - ngOnDestroy : Called once the component is about to be destroyed
- 
- 
- 
- 
+
  
 # Useful Commands
 
