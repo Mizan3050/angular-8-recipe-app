@@ -8,7 +8,6 @@ import {RecipeEditComponent} from './recipe-edit/recipe-edit.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {RecipesRoutingModule} from './recipes-routing.module';
-import {RouterModule} from '@angular/router';
 import {DropdownDirective} from '../shared/dropdown-directive/dropdown.directive';
 
 @NgModule({
@@ -21,7 +20,7 @@ import {DropdownDirective} from '../shared/dropdown-directive/dropdown.directive
     RecipeEditComponent,
     DropdownDirective
   ],
-  imports: [RouterModule, CommonModule, ReactiveFormsModule, RecipesRoutingModule],
+  imports: [CommonModule, ReactiveFormsModule, RecipesRoutingModule],
   exports: [
     RecipesComponent,
     RecipeDetailComponent,
