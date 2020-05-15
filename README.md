@@ -153,7 +153,7 @@ export class BasicHighlightDirective implements OnInit {
 ```
 
 ## Better Custom Directive
-``angular2
+```angular2
 @Directive({
   selector: '[appBetterHighlight]'
 })
@@ -1054,6 +1054,11 @@ Add new interceptor as a provider with following parameters,
 export class AppModule {
 }
 ```
+
+# Angular Modules & Optimizing Angular Apps
+
+
+
 
 # Component Lifecycle
 
