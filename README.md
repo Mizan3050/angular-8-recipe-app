@@ -1057,9 +1057,39 @@ export class AppModule {
 
 # Angular Modules & Optimizing Angular Apps
 
+Split into multiple modules and provide lazy loading for better performance.
+1- Remove `recipes` path, and leave it empty in `RecipesRoutingModule`
+```angular2
+const routes: Routes = [{
+  path: 'recipes', component: RecipesComponent, canActivate: [AuthGuard], children: [
+    {path: '', component: RecipeStartComponent},
+    {path: 'new', component: RecipeEditComponent},
+    {path: ':id', component: RecipeDetailComponent, resolve: [RecipesResolverService]},
+    {path: ':id/edit', component: RecipeEditComponent, resolve: [RecipesResolverService]}
+  ]
+}];
 
-
-
+const routes: Routes = [{
+  path: '', component: RecipesComponent, canActivate: [AuthGuard], children: [
+    {path: '', component: RecipeStartComponent},
+    {path: 'new', component: RecipeEditComponent},
+    {path: ':id', component: RecipeDetailComponent, resolve: [RecipesResolverService]},
+    {path: ':id/edit', component: RecipeEditComponent, resolve: [RecipesResolverService]}
+  ]
+}];
+```
+2- change `AppRoutingModule` like below :
+```angular2
+const appRoutes: Routes = [
+  {path: '', redirectTo: '/recipes', pathMatch: 'full'},
+  {path: '', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule)}
+];
+```
+This is a special property in a root config which Angular understands as a policy
+ only load the code content or the module when the users visit here.
+ 
+3- Remove RecipesModule declaration from NgModule imports section.
+ 
 # Component Lifecycle
 
  - ngOnChanges : executed multiple times, it's executed right at the start when a new component is created but thereafter, 
