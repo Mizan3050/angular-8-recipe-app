@@ -1082,14 +1082,18 @@ const routes: Routes = [{
 ```angular2
 const appRoutes: Routes = [
   {path: '', redirectTo: '/recipes', pathMatch: 'full'},
-  {path: '', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule)}
+  {path: 'recipes', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule)}
 ];
 ```
 This is a special property in a root config which Angular understands as a policy
  only load the code content or the module when the users visit here.
  
 3- Remove RecipesModule declaration from NgModule imports section.
- 
+ ## PreLoading Lazy-Loaded Code
+ This makes first to install eager code, and as soon as possible it will load other lazy-loaded modules.  
+ ```angular2
+  imports: [RouterModule.forRoot(appRoutes, {preloadingStrategy: PreloadAllModules})]
+``` 
 # Component Lifecycle
 
  - ngOnChanges : executed multiple times, it's executed right at the start when a new component is created but thereafter, 

@@ -1,13 +1,9 @@
 import {NgModule} from '@angular/core';
 import {ShoppingListComponent} from './shopping-list.component';
-import {RouterModule, Routes} from '@angular/router';
-
-const routes: Routes = [
-  {path: 'shopping-list', component: ShoppingListComponent}
-];
+import {RouterModule} from '@angular/router';
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild([{path: '', component: ShoppingListComponent}])],
   exports: [RouterModule]
 })
 export class ShoppingListRoutingModule {
