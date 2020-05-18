@@ -1056,7 +1056,7 @@ export class AppModule {
 ```
 
 # Angular Modules & Optimizing Angular Apps
-
+## Split Into Multiple Modules
 Split into multiple modules and provide lazy loading for better performance.
 1- Remove `recipes` path, and leave it empty in `RecipesRoutingModule`
 ```angular2
@@ -1094,6 +1094,13 @@ This is a special property in a root config which Angular understands as a polic
  ```angular2
   imports: [RouterModule.forRoot(appRoutes, {preloadingStrategy: PreloadAllModules})]
 ``` 
+
+## Ahead of Time (AOT) vs Just-In-Time(JIT)
+Ahead of Time (AOT) for production (compile Angular application during development stage) --> `ng build --prod`
+Just-In-Time(JIT) for development (compile Angular application on runtime, <browser>). Provides proper error messages, debugging capabilities etc..
+
+
+
 # Component Lifecycle
 
  - ngOnChanges : executed multiple times, it's executed right at the start when a new component is created but thereafter, 
