@@ -1126,3 +1126,7 @@ or <br>
 
 Run up development server : <br>
 `ng server`
+
+Want to update existing projects? 
+
+`ng update` should do the trick.
