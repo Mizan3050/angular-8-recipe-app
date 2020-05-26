@@ -48,16 +48,16 @@ export class AuthService {
       email: string,
       id: string,
       _token: string,
-      _expirationDate: string
+      _tokenExpirationDate: string
     } = JSON.parse(localStorage.getItem('userData'));
     if (!userData) {
       return;
     }
-    const loadedUser = new User(userData.email, userData.id, userData._token, new Date(userData._expirationDate));
+    const loadedUser = new User(userData.email, userData.id, userData._token, new Date(userData._tokenExpirationDate));
 
     if (loadedUser.token) {
       this.userSubject.next(loadedUser);
-      const expirationTime = new Date(userData._expirationDate).getTime() - new Date().getTime();
+      const expirationTime = new Date(loadedUser._tokenExpirationDate).getTime() - new Date().getTime();
       this.autoLogout(expirationTime);
     }
   }

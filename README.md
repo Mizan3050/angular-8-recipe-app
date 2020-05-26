@@ -1099,6 +1099,24 @@ This is a special property in a root config which Angular understands as a polic
 Ahead of Time (AOT) for production (compile Angular application during development stage) --> `ng build --prod`
 Just-In-Time(JIT) for development (compile Angular application on runtime, <browser>). Provides proper error messages, debugging capabilities etc..
 
+# Adding Offline Capabilities with Service Workers
+
+## Adding Service Workers
+Service workers are running another thread. which is apart from our main JS thread on browser. 
+`ng add @angular/pwa`
+This will configure the project automatically.
+In app module, It will import `ServiceWorkerModule.register` as below:  
+
+```angular2
+
+@NgModule({
+  declarations: [AppComponent, PostComponent],
+  imports: [BrowserModule, HttpClientModule, ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+```
+By doing this, it will act like a proxy, it catches outgoing request and does something with them. `ngsw-worker.js` file will be generated while build process.
 
 
 # Component Lifecycle

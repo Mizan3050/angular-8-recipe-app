@@ -21,7 +21,6 @@ export class RecipeService {
     this.recipesChanged.next(this.recipes.slice());
   }
 
-
   getRecipes(): Recipe[] {
     return this.recipes.slice();
   }

@@ -1,7 +1,7 @@
 export class User {
   constructor(public email: string, public id: string,
               // tslint:disable-next-line:variable-name
-              private _token: string, private _tokenExpirationDate: Date) {
+              private _token: string, public _tokenExpirationDate: Date) {
   }
 
   get token() {
