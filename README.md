@@ -1132,6 +1132,197 @@ By doing this, it will act like a proxy, it catches outgoing request and does so
  - ngOnDestroy : Called once the component is about to be destroyed
 
  
+# NgRx
+It is state management tool. Basically Redux for Angular.
+
+Important to add this new module `StoreModule` into App
+```angular2
+    StoreModule.forRoot({shoppingList: shoppingListReducer})
+```
+
+```angular2
+import {Action} from '@ngrx/store';
+import {Ingredient} from '../../shared/ingredient.model';
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+export const ADD_INGREDIENTS = 'ADD_INGREDIENTS';
+export const UPDATE_INGREDIENT = 'UPDATE_INGREDIENT';
+export const DELETE_INGREDIENT = 'DELETE_INGREDIENT';
+export const START_EDIT = 'START_EDIT';
+export const STOP_EDIT = 'STOP_EDIT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT;
+
+  constructor(public payload: Ingredient) {
+  }
+}
+
+export class AddIngredients implements Action {
+  readonly type = ADD_INGREDIENTS;
+
+  constructor(public payload: Ingredient[]) {
+  }
+}
+
+export class UpdateIngredient implements Action {
+  readonly type = UPDATE_INGREDIENT;
+
+  constructor(public payload: Ingredient) {
+  }
+}
+
+export class DeleteIngredient implements Action {
+  readonly type = DELETE_INGREDIENT;
+}
+
+export class StartEdit implements Action {
+  readonly type = START_EDIT;
+
+  constructor(public payload: number) {
+  }
+}
+
+export class StopEdit implements Action {
+  readonly type = STOP_EDIT;
+}
+
+export type ShoppingListActions =
+  AddIngredient
+  | AddIngredients
+  | UpdateIngredient
+  | DeleteIngredient
+  | StartEdit
+  | StopEdit;
+
+```
+
+```angular2
+import {Ingredient} from '../../shared/ingredient.model';
+import {
+  ADD_INGREDIENT,
+  ADD_INGREDIENTS,
+  DELETE_INGREDIENT,
+  ShoppingListActions,
+  START_EDIT,
+  STOP_EDIT,
+  UPDATE_INGREDIENT
+} from './shopping-list.actions';
+
+export interface AppState {
+  shoppingList: State;
+}
+
+export interface State {
+  ingredients: Ingredient[];
+  editedIngredient: Ingredient;
+  editedIngredientIndex: number;
+}
+
+const initialState: State = {
+  ingredients: [
+    new Ingredient('Apples', 5),
+    new Ingredient('Tomatoes', 10)
+  ],
+  editedIngredient: null,
+  editedIngredientIndex: -1
+};
+
+export function shoppingListReducer(state: State = initialState, action: ShoppingListActions) {
+  switch (action.type) {
+    case ADD_INGREDIENT:
+      return {...state, ingredients: [...state.ingredients, action.payload]};
+    case ADD_INGREDIENTS:
+      return {...state, ingredients: [...state.ingredients, ...action.payload]};
+    case UPDATE_INGREDIENT:
+      return {
+        ...state,
+        ingredients: [
+          ...state.ingredients.slice(0, state.editedIngredientIndex),
+          action.payload,
+          ...state.ingredients.slice(state.editedIngredientIndex + 1)
+        ],
+        editedIngredientIndex: -1,
+        editedIngredient: null
+      };
+    case DELETE_INGREDIENT:
+      return {
+        ...state,
+        ingredients: [
+          ...state.ingredients.slice(0, state.editedIngredientIndex)
+            .concat(...state.ingredients.slice(state.editedIngredientIndex + 1, state.ingredients.length))
+        ],
+        editedIngredientIndex: -1,
+        editedIngredient: null
+      };
+    case START_EDIT:
+      return {
+        ...state,
+        editedIngredientIndex: action.payload,
+        editedIngredient: {...state.ingredients[action.payload]}
+      };
+    case STOP_EDIT:
+      return {
+        ...state,
+        editedIngredientIndex: -1,
+        editedIngredient: null
+      };
+    default:
+      return state;
+  }
+}
+
+```
+and inject generic store with it's type inside `ShoppingListComponent`. Get rid of older subscriptions for subject
+ 
+```angular2
+import {Component, OnInit} from '@angular/core';
+import {Ingredient} from '../shared/ingredient.model';
+import {ShoppingListService} from './shopping-list.service';
+import {Observable} from 'rxjs';
+import {Store} from '@ngrx/store';
+
+@Component({
+  selector: 'app-shopping-list',
+  templateUrl: './shopping-list.component.html',
+  styleUrls: ['./shopping-list.component.css']
+})
+export class ShoppingListComponent implements OnInit {
+
+    ingredients: Observable<{ ingredients: Ingredient[] }>;
+  
+    constructor(private store: Store<ShoppingListReducer.AppState>) {
+    }
+  
+    ngOnInit() {
+      this.ingredients = this.store.select('shoppingList');
+    }
+  
+    onEditItem(index: number) {
+      this.store.dispatch(new ShoppingListActions.StartEdit(index));
+    }
+}
+
+```
+We subscribed to ingredients using async with pipe.
+```angular2html
+<div class="row">
+  <div class="col-xs-10">
+    <app-shopping-edit></app-shopping-edit>
+    <hr>
+    <ul class="list-group">
+      <a
+        *ngFor="let ingredient of (ingredients | async ).ingredients; let i = index"
+        class="list-group-item"
+        style="cursor: pointer;"
+        (click)="onEditItem(i)">
+        {{ingredient.name}} ({{ingredient.amount}})
+      </a>
+    </ul>
+  </div>
+</div>
+
+```
 # Useful Commands
 
 Create a project : <br>
