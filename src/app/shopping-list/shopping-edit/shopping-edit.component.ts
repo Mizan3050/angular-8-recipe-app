@@ -5,7 +5,7 @@ import {amountValidator} from './amount-validator';
 import {Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import * as ShoppingListActions from '../store/shopping-list.actions';
-import * as ShoppingListReducer from '../store/shopping-list.reducer';
+import * as App from '../../store/appReducer';
 
 @Component({
   selector: 'app-shopping-edit',
@@ -20,7 +20,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   editedIndex: number;
   editedItem: Ingredient;
 
-  constructor(private store: Store<ShoppingListReducer.AppState>) {}
+  constructor(private store: Store<App.AppState>) {}
 
   ngOnInit() {
     this.initForm();
