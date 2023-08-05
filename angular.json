@@ -122,7 +122,6 @@
       }
     }
   },
-  "defaultProject": "angular-recipe-app",
   "cli": {
     "analytics": false
   }
